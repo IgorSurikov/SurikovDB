@@ -1,4 +1,5 @@
-from constants import BLOCK_SIZE, BYTEORDER, POINTER_SIZE, POINTERS_PER_BLOCK
+from src.constants import BLOCK_SIZE, BYTEORDER, POINTER_SIZE, POINTERS_PER_BLOCK
+
 
 class Block(bytearray):
 
@@ -30,6 +31,3 @@ class Block(bytearray):
 
         binary = pointer.to_bytes(POINTER_SIZE, byteorder=BYTEORDER)
         self.override(index * POINTER_SIZE, binary)
-
-
-

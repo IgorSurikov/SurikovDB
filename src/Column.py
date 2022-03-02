@@ -1,13 +1,15 @@
 import abc
 from abc import ABCMeta
-from constants import COLUMN_NAME_SIZE
+from struct import calcsize
+
+from src.constants import *
 
 
 class Column(metaclass=ABCMeta):
 
     def __init__(self, name: str):
-        if len(name.encode()) > COLUMN_NAME_SIZE:
-            raise Exception(f"Column name '{name}' more then column name max size({COLUMN_NAME_SIZE})")
+        if len(name.encode()) > calcsize(COLUMN_NAME_F):
+            raise Exception(f"Column name '{name}' more then column name max size({calcsize(COLUMN_NAME_F)})")
         self._name = name
 
     @property
@@ -23,6 +25,7 @@ class Column(metaclass=ABCMeta):
     @abc.abstractmethod
     def code(self) -> int:
         pass
+
 
 
 class ColumnChar(Column):
@@ -43,6 +46,9 @@ class ColumnChar(Column):
     def code(self) -> int:
         return self._len_bytes
 
+    def __str__(self):
+        return f'{self.name} - char({self._len_bytes})'
+
 
 class ColumnLong(Column):
 
@@ -57,6 +63,9 @@ class ColumnLong(Column):
     @property
     def code(self) -> int:
         return -1
+
+    def __str__(self):
+        return f'{self.name} - long'
 
 
 class ColumnFactory:
