@@ -4,7 +4,7 @@ from src.Column import Column, ColumnFactory
 from src.constants import *
 
 
-class Table:
+class TableMetaData:
     def __init__(self, name: str, column_list: list[Column]):
         if len(name.encode()) > calcsize(TABLE_NAME_F):
             raise Exception(f"Table name '{name}' more then table name max size({calcsize(TABLE_NAME_F)})")
@@ -20,6 +20,10 @@ class Table:
         return ''.join([c.struct_format for c in self._column_list])
 
     @property
+    def name(self):
+        return self._name
+
+    @property
     def encode_ddl(self) -> bytes:
 
         ddl = [
@@ -33,7 +37,7 @@ class Table:
         return struct.pack(self._get_ddl_struct_format(), *ddl)
 
     @classmethod
-    def from_encode_ddl(cls, encode_ddl: bytes) -> 'Table':
+    def from_encode_ddl(cls, encode_ddl: bytes) -> 'TableMetaData':
         ptr = 0
 
         table_name = unpack_from(TABLE_NAME_F, encode_ddl)[0].strip(b'\x00').decode()

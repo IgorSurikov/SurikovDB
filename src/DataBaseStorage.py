@@ -1,15 +1,19 @@
 import os.path
 import struct
-from typing import Generator
+import typing
+from collections import namedtuple
+from typing import Generator, NoReturn
 
-from src.Table import Table
+from src.TableMetaData import TableMetaData
 from src.constants import *
-from src.Block import Block
+from src.Block import Block, TableMetaDataBlock
 from struct import calcsize, unpack_from
 
 
 class DataBaseStorage():
-    TABLE_DESCRIPTOR_BLOCK_COUNT = 16
+    TABLE_META_DATA_BLOCK_COUNT = 10
+    table_meta_data_gen_result = typing.NamedTuple('table_meta_data_gen_result',
+                                                   [('table_meta_data', TableMetaData), ('block_index', int)])
 
     def __init__(self, path: str):
         self.file = open(path, 'r+b', buffering=16 * BLOCK_SIZE)
@@ -21,7 +25,7 @@ class DataBaseStorage():
             self.block_count = file_size // BLOCK_SIZE
 
         if self.block_count == 0:
-            for _ in range(self.TABLE_DESCRIPTOR_BLOCK_COUNT):
+            for _ in range(self.TABLE_META_DATA_BLOCK_COUNT):
                 self.allocate_block()
 
     def read_block(self, index: int) -> Block:
@@ -45,41 +49,34 @@ class DataBaseStorage():
         self.write_block(block)
         return block
 
-    def write_table(self, table: Table) -> None:
-        last_iteration = None
-        for i in self.table_iter():
-            last_iteration = i
-
-        if last_iteration is None:
-            block_index = 0
-            ptr = 0
+    def drop_table(self, table_name):
+        for table_meta_data, block_index in self.table_meta_data_gen():
+            if table_meta_data.name == table_name:
+                b = self.read_block(block_index)
+                b.free()
+                self.write_block(b)
+                break
         else:
-            _, block_index, ptr = last_iteration
+            raise Exception('Table is not exist')
 
-        ddl = table.encode_ddl
-        ddl = struct.pack(f'{TABLE_IS_DELETED_F}{TABLE_DDL_SIZE_F}', False, len(ddl)) + ddl
+    def create_table(self, table_meta_data: TableMetaData) -> NoReturn:
 
-        if len(ddl) + ptr > BLOCK_SIZE:
-            block_index += 1
-            ptr = 0
-            if block_index >= self.TABLE_DESCRIPTOR_BLOCK_COUNT:
-                raise Exception('No space to create table')
+        for i in range(self.TABLE_META_DATA_BLOCK_COUNT):
+            b = self.read_block(i)
+            if b.is_empty:
+                b = TableMetaDataBlock.from_block(b)
+                break
+        else:
+            raise Exception('No space for table')
 
-        b = self.read_block(block_index)
-        b.override(ptr, ddl)
+        b.create_table(table_meta_data)
         self.write_block(b)
 
-    def table_iter(self) -> Generator[tuple[Table, int, int], None, None]:
-        for block_index in range(self.TABLE_DESCRIPTOR_BLOCK_COUNT):
-            b = self.read_block(block_index)
-            ptr = 0
-            while True:
-                table_is_deleted, ddl_size = unpack_from(f'{TABLE_IS_DELETED_F}{TABLE_DDL_SIZE_F}', b, ptr)
-                ptr += calcsize(f'{TABLE_IS_DELETED_F}{TABLE_DDL_SIZE_F}')
-                if ddl_size == 0:
-                    break
+    def table_meta_data_gen(self) -> Generator[table_meta_data_gen_result, None, None]:
+        for block_index in range(self.TABLE_META_DATA_BLOCK_COUNT):
+            b = TableMetaDataBlock.from_block(self.read_block(block_index))
 
-                if not table_is_deleted:
-                    yield Table.from_encode_ddl(b[ptr: ptr + ddl_size]), block_index, ptr + ddl_size
+            if b.is_empty:
+                continue
 
-                ptr += ddl_size
+            yield self.table_meta_data_gen_result(b.get_table_meta_data(), block_index)
