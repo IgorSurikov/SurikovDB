@@ -6,7 +6,7 @@ from typing import Generator, NoReturn
 
 from src.TableMetaData import TableMetaData
 from src.constants import *
-from src.Block import Block, TableMetaDataBlock
+from src.Block import Block, TableMetaDataBlock, DataBlock
 from struct import calcsize, unpack_from
 
 
@@ -36,7 +36,7 @@ class DataBaseStorage():
         block = Block(self.file.read(BLOCK_SIZE), index)
         return block
 
-    def write_block(self, block: Block) -> None:
+    def write_block(self, block: Block) -> NoReturn:
         if block.idx > self.block_count:
             raise Exception('Block is not exist')
 
@@ -70,7 +70,50 @@ class DataBaseStorage():
             raise Exception('No space for table')
 
         b.create_table(table_meta_data)
+        data_block_for_pointers = DataBlock.from_block(self.allocate_block(), POINTER_F)
+        data_block_for_table_data = self.allocate_block()
+
+        data_block_for_pointers.add_rows(
+            [(data_block_for_table_data.idx,)])
+
+        b.add_pointers([data_block_for_pointers.idx])
+
+        self.write_block(data_block_for_pointers)
+        self.write_block(data_block_for_table_data)
         self.write_block(b)
+
+    def insert_into(self, table_name: str, row: tuple):
+        for table_meta_data, block_index in self.table_meta_data_gen():
+            if table_meta_data.name == table_name:
+                break
+        else:
+            raise Exception('Table is not exist')
+
+        row = (False,) + row
+        row_format = f'{ROW_IS_DELETED_F}{table_meta_data.row_struct_format}'
+
+        table_meta_data_block = TableMetaDataBlock.from_block(self.read_block(block_index))
+
+        data_block_for_pointers = DataBlock.from_block(
+            self.read_block(table_meta_data_block.get_last_pointer()),
+            POINTER_F)
+
+        data_block_for_table_data = DataBlock.from_block(
+            self.read_block(data_block_for_pointers.get_last_row()[0]),
+            row_format)
+
+        if data_block_for_table_data.is_full:
+            if data_block_for_pointers.is_full:
+                data_block_for_pointers = DataBlock.from_block(self.allocate_block(), POINTER_F)
+                table_meta_data_block.add_pointers([data_block_for_pointers.idx])
+                self.write_block(table_meta_data_block)
+
+            data_block_for_table_data = DataBlock.from_block(self.allocate_block(), row_format)
+            data_block_for_pointers.add_rows([(data_block_for_table_data.idx,)])
+            self.write_block(data_block_for_pointers)
+
+        data_block_for_table_data.add_rows([row])
+        self.write_block(data_block_for_table_data)
 
     def table_meta_data_gen(self) -> Generator[table_meta_data_gen_result, None, None]:
         for block_index in range(self.TABLE_META_DATA_BLOCK_COUNT):
