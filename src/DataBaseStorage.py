@@ -4,6 +4,7 @@ import typing
 from collections import namedtuple
 from typing import Generator, NoReturn
 
+from src.RowSet import RowSet
 from src.TableMetaData import TableMetaData
 from src.constants import *
 from src.Block import Block, TableMetaDataBlock, DataBlock
@@ -90,7 +91,7 @@ class DataBaseStorage():
             raise Exception('Table is not exist')
 
         row = (False,) + row
-        row_format = f'{ROW_IS_DELETED_F}{table_meta_data.row_struct_format}'
+        row_format = table_meta_data.row_struct_format
 
         table_meta_data_block = TableMetaDataBlock.from_block(self.read_block(block_index))
 
@@ -114,6 +115,30 @@ class DataBaseStorage():
 
         data_block_for_table_data.add_rows([row])
         self.write_block(data_block_for_table_data)
+
+    def scan(self, table_name) -> RowSet:
+        for table_meta_data, block_index in self.table_meta_data_gen():
+            if table_meta_data.name == table_name:
+                break
+        else:
+            raise Exception('Table is not exist')
+
+        row_format = table_meta_data.row_struct_format
+
+        table_meta_data_block = TableMetaDataBlock.from_block(self.read_block(block_index))
+        pointer_on_block_of_pointers_list = table_meta_data_block.get_pointers()
+
+        def row_gen() -> Generator[ROW_TYPE, None, None]:
+            for i in pointer_on_block_of_pointers_list:
+                pointer_on_block_of_table_data_list = DataBlock.from_block(self.read_block(i), POINTER_F).get_rows()
+                for j in pointer_on_block_of_table_data_list:
+                    table_data_block = DataBlock.from_block(self.read_block(j[0]), row_format)
+                    row_list = table_data_block.get_rows()
+                    for k in row_list:
+                        if not k[0]:
+                            yield k[1:]
+
+        return RowSet(table_meta_data.column_list, row_gen())
 
     def table_meta_data_gen(self) -> Generator[table_meta_data_gen_result, None, None]:
         for block_index in range(self.TABLE_META_DATA_BLOCK_COUNT):
