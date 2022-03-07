@@ -1,4 +1,4 @@
-from typing import Union, Callable, Any, Set
+from typing import Union, Callable, Any, Set, Tuple
 
 
 class Expression:
@@ -22,34 +22,37 @@ class Expression:
         self.value = value
         self.context_args = context_args
 
-    def parse(self) -> Callable[..., Any]:
+    def parse(self) -> Tuple[Callable[..., Any], Set[str]]:
         v = self.value
 
         if isinstance(v, str):
             if v.startswith("'") and v.endswith("'"):
                 v = v.strip("'")
-                return lambda **x: v
+                return lambda **x: v, self.context_args
 
             elif v in self.math_function_map:
                 return lambda: {
                     'fn': self.math_function_map[f'{v}']
-                }
+                }, self.context_args
+
+            elif v in ['True', 'False']:
+                return lambda **x: bool(v), self.context_args
 
             elif isinstance(v, str) and not v.startswith("'") and not v.endswith("'"):
                 self.context_args.add(v)
-                return lambda **x: x[f'{v}']
+                return lambda **x: x[f'{v}'], self.context_args
 
             else:
                 raise Exception(f'invalid string: {v}')
 
         if isinstance(v, int):
-            return lambda **x: v
+            return lambda **x: v, self.context_args
 
         if isinstance(v, list):
             try:
-                func = Expression(v[0], self.context_args).parse()()['fn']
+                func = Expression(v[0], self.context_args).parse()[0]()['fn']
             except (TypeError, KeyError):
                 raise Exception(f'invalid function: {v}')
 
-            args = [Expression(i, self.context_args).parse() for i in v[1:]]
-            return lambda **x: func(*[a.__call__(**x) for a in args])
+            args = [Expression(i, self.context_args).parse()[0] for i in v[1:]]
+            return lambda **x: func(*[a.__call__(**x) for a in args]), self.context_args
