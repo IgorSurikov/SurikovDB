@@ -17,11 +17,15 @@ class TableMetaData:
 
     @property
     def row_struct_format(self) -> str:
-        return ''.join([c.struct_format for c in self._column_list])
+        return f'{ROW_IS_DELETED_F}' + ''.join([c.struct_format for c in self._column_list])
 
     @property
     def name(self):
         return self._name
+
+    @property
+    def column_list(self) -> list[Column]:
+        return self._column_list
 
     @property
     def encode_ddl(self) -> bytes:
@@ -58,12 +62,12 @@ class TableMetaData:
 
     def _check_row_size(self) -> None:
         f = self.row_struct_format
-        size = struct.calcsize(f)
-        if size + 1 > BLOCK_SIZE:
+        size = calcsize(f)
+        if size > BLOCK_SIZE - calcsize(ROW_COUNT_F):
             raise Exception('Row size more then block size.')
 
     def _check_ddl_size(self) -> None:
-        if (struct.calcsize(self._get_ddl_struct_format()) + calcsize(TABLE_DDL_SIZE_F)) > BLOCK_SIZE:
+        if (calcsize(self._get_ddl_struct_format()) + calcsize(TABLE_DDL_SIZE_F)) > BLOCK_SIZE:
             raise Exception(f"Table ddl more then block size")
 
     def _get_ddl_struct_format(self) -> str:
