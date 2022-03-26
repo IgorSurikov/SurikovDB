@@ -1,6 +1,7 @@
 import abc
 from abc import ABCMeta
 from struct import calcsize
+from typing import Any
 
 from src.constants import *
 
@@ -26,6 +27,9 @@ class Column(metaclass=ABCMeta):
     def code(self) -> int:
         pass
 
+    @abc.abstractmethod
+    def is_valid_value(self, value: Any) -> bool:
+        pass
 
 
 class ColumnChar(Column):
@@ -37,6 +41,12 @@ class ColumnChar(Column):
             raise Exception('Incorrect char length')
 
         self._len_bytes = len_bytes
+
+    def is_valid_value(self, value: Any) -> bool:
+        if isinstance(value, str) and len(value.encode()) <= self._len_bytes:
+            return True
+        else:
+            return False
 
     @property
     def struct_format(self) -> str:
@@ -55,6 +65,12 @@ class ColumnLong(Column):
     def __init__(self, name: str):
         super().__init__(name)
         self._struct_format = 'l'
+
+    def is_valid_value(self, value: Any) -> bool:
+        if isinstance(value, int) and (-2147483648 <= value <= 2147483647):
+            return True
+        else:
+            return False
 
     @property
     def struct_format(self) -> str:
