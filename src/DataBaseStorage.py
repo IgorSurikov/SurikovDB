@@ -4,6 +4,8 @@ import typing
 from collections import namedtuple
 from typing import Generator, NoReturn
 
+from src.BlockStorage import BlockStorage
+from src.Expression import Expression
 from src.RowSet import RowSet
 from src.TableMetaData import TableMetaData
 from src.constants import *
@@ -11,44 +13,32 @@ from src.Block import Block, TableMetaDataBlock, DataBlock
 from struct import calcsize, unpack_from
 
 
-class DataBaseStorage():
+class DataBaseStorage(BlockStorage):
     TABLE_META_DATA_BLOCK_COUNT = 10
     table_meta_data_gen_result = typing.NamedTuple('table_meta_data_gen_result',
                                                    [('table_meta_data', TableMetaData), ('block_index', int)])
 
     def __init__(self, path: str):
-        self.file = open(path, 'r+b', buffering=16 * BLOCK_SIZE)
-        file_size = os.path.getsize(path)
-
-        if file_size % BLOCK_SIZE:
-            raise Exception('Incorrect DB file')
-        else:
-            self.block_count = file_size // BLOCK_SIZE
+        super().__init__(path, BLOCK_SIZE)
 
         if self.block_count == 0:
             for _ in range(self.TABLE_META_DATA_BLOCK_COUNT):
                 self.allocate_block()
 
-    def read_block(self, index: int) -> Block:
-        if index > self.block_count:
-            raise Exception('Block is not exist')
+    def scan_table_data_block_gen(self,
+                                  table_meta_data: TableMetaData,
+                                  table_meta_data_block_index: int) -> Generator[DataBlock, None, None]:
 
-        self.file.seek(index * BLOCK_SIZE)
-        block = Block(self.file.read(BLOCK_SIZE), index)
-        return block
+        row_format = table_meta_data.row_struct_format
 
-    def write_block(self, block: Block) -> NoReturn:
-        if block.idx > self.block_count:
-            raise Exception('Block is not exist')
+        table_meta_data_block = TableMetaDataBlock.from_block(self.read_block(table_meta_data_block_index))
+        pointer_on_block_of_pointers_list = table_meta_data_block.get_pointers()
 
-        self.file.seek(block.idx * BLOCK_SIZE)
-        self.file.write(block)
-
-    def allocate_block(self) -> Block:
-        block = Block.empty(self.block_count)
-        self.block_count += 1
-        self.write_block(block)
-        return block
+        for i in pointer_on_block_of_pointers_list:
+            pointer_on_block_of_table_data_list = DataBlock.from_block(self.read_block(i), POINTER_F).read_rows()
+            for j in pointer_on_block_of_table_data_list:
+                table_data_block = DataBlock.from_block(self.read_block(j[0]), row_format)
+                yield table_data_block
 
     def drop_table(self, table_name):
         for table_meta_data, block_index in self.table_meta_data_gen():
@@ -74,8 +64,8 @@ class DataBaseStorage():
         data_block_for_pointers = DataBlock.from_block(self.allocate_block(), POINTER_F)
         data_block_for_table_data = self.allocate_block()
 
-        data_block_for_pointers.add_rows(
-            [(data_block_for_table_data.idx,)])
+        data_block_for_pointers.write_row(
+            (data_block_for_table_data.idx,))
 
         b.add_pointers([data_block_for_pointers.idx])
 
@@ -83,60 +73,19 @@ class DataBaseStorage():
         self.write_block(data_block_for_table_data)
         self.write_block(b)
 
-    def insert_into(self, table_name: str, row: tuple):
+    def scan(self, table_name: str) -> RowSet:
         for table_meta_data, block_index in self.table_meta_data_gen():
             if table_meta_data.name == table_name:
                 break
         else:
             raise Exception('Table is not exist')
-
-        row = (False,) + row
-        row_format = table_meta_data.row_struct_format
-
-        table_meta_data_block = TableMetaDataBlock.from_block(self.read_block(block_index))
-
-        data_block_for_pointers = DataBlock.from_block(
-            self.read_block(table_meta_data_block.get_last_pointer()),
-            POINTER_F)
-
-        data_block_for_table_data = DataBlock.from_block(
-            self.read_block(data_block_for_pointers.get_last_row()[0]),
-            row_format)
-
-        if data_block_for_table_data.is_full:
-            if data_block_for_pointers.is_full:
-                data_block_for_pointers = DataBlock.from_block(self.allocate_block(), POINTER_F)
-                table_meta_data_block.add_pointers([data_block_for_pointers.idx])
-                self.write_block(table_meta_data_block)
-
-            data_block_for_table_data = DataBlock.from_block(self.allocate_block(), row_format)
-            data_block_for_pointers.add_rows([(data_block_for_table_data.idx,)])
-            self.write_block(data_block_for_pointers)
-
-        data_block_for_table_data.add_rows([row])
-        self.write_block(data_block_for_table_data)
-
-    def scan(self, table_name) -> RowSet:
-        for table_meta_data, block_index in self.table_meta_data_gen():
-            if table_meta_data.name == table_name:
-                break
-        else:
-            raise Exception('Table is not exist')
-
-        row_format = table_meta_data.row_struct_format
-
-        table_meta_data_block = TableMetaDataBlock.from_block(self.read_block(block_index))
-        pointer_on_block_of_pointers_list = table_meta_data_block.get_pointers()
 
         def row_gen() -> Generator[ROW_TYPE, None, None]:
-            for i in pointer_on_block_of_pointers_list:
-                pointer_on_block_of_table_data_list = DataBlock.from_block(self.read_block(i), POINTER_F).get_rows()
-                for j in pointer_on_block_of_table_data_list:
-                    table_data_block = DataBlock.from_block(self.read_block(j[0]), row_format)
-                    row_list = table_data_block.get_rows()
-                    for k in row_list:
-                        if not k[0]:
-                            yield k[1:]
+            for table_data_block in self.scan_table_data_block_gen(table_meta_data, block_index):
+                row_list = table_data_block.read_rows()
+                for k in row_list:
+                    if not k[0]:
+                        yield k[1:]
 
         return RowSet(table_meta_data.column_list, row_gen())
 
@@ -148,3 +97,10 @@ class DataBaseStorage():
                 continue
 
             yield self.table_meta_data_gen_result(b.get_table_meta_data(), block_index)
+
+    def get_table_meta_data(self, table_name: str) -> table_meta_data_gen_result:
+        for i in self.table_meta_data_gen():
+            if i.table_meta_data.name == table_name:
+                return i
+        else:
+            raise Exception('Table is not exist')
