@@ -14,5 +14,5 @@ TABLE_DDL_SIZE_F = 'H'
 ROW_IS_DELETED_F = '?'
 
 
-DB_TYPE = Union[int, str]
+DB_TYPE = Union[bool, int, str]
 ROW_TYPE = Tuple[DB_TYPE, ...]
