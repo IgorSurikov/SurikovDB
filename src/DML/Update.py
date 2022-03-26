@@ -21,6 +21,8 @@ class Update:
         }
         column_map['.ROW_IS_DELETED'] = 0
 
+        result = 0
+
         for data_block in data_base_storage.scan_table_data_block_gen(table_meta_data, block_index):
             row_list = data_block.read_rows()
             filter_exp_func, filter_exp_arg_name_list = self._filter_exp.parse()
@@ -36,6 +38,8 @@ class Update:
                     continue
 
                 row_list_filtered.append((row_id, row))
+
+            row_list_filtered = [i for i in row_list_filtered if i[1][0] == False]
 
             if len(row_list_filtered) == 0:
                 continue
@@ -61,9 +65,11 @@ class Update:
 
             yield data_block
             for row_id, row in row_list_result:
+                result += 1
                 data_block.write_row(row, row_id)
 
             data_base_storage.write_block(data_block)
+        self._result = result
 
     @property
     def result(self):

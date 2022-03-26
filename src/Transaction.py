@@ -1,4 +1,5 @@
 import datetime
+import os
 import typing
 from struct import unpack_from, pack, calcsize, iter_unpack
 from typing import NoReturn, Generator
@@ -20,6 +21,11 @@ class Transaction(BlockStorage):
         self._command_list = command_list
         self._result = None
         self._block_idx_list = [i.idx for i in self._block_gen()]
+        self._path = path
+
+    def __del__(self):
+        self._file.close()
+        os.remove(self._path)
 
     @property
     def result(self):
@@ -51,4 +57,5 @@ class Transaction(BlockStorage):
         for c in self._command_list:
             for modified_block in c.execute(data_base_storage):
                 self._save_database_storage_block(modified_block)
-                self._result = c.result
+
+        self._result = self._command_list[::-1][0].result
