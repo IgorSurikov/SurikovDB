@@ -1,19 +1,20 @@
 from typing import Generator
 
 from src.Block import TableMetaDataBlock, DataBlock, Block
+from src.DML.DMLCommand import DMLCommand
 from src.DataBaseStorage import DataBaseStorage
 from src.Expression import Expression
 from src.constants import *
 
 
-class Update:
+class Update(DMLCommand):
     def __init__(self, table_name: str, filter_exp: Expression, update_map: dict[str, Expression]):
         self._table_name = table_name
         self._filter_exp = filter_exp
         self._update_map = update_map
         self._result = None
 
-    def execute(self, data_base_storage: DataBaseStorage):
+    def execute(self, data_base_storage: DataBaseStorage) -> Generator[Block, None, None]:
         table_meta_data, block_index = data_base_storage.get_table_meta_data(self._table_name)
 
         column_map = {

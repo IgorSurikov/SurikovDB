@@ -1,11 +1,12 @@
 from typing import Generator
 
 from src.Block import TableMetaDataBlock, DataBlock, Block
+from src.DML.DMLCommand import DMLCommand
 from src.DataBaseStorage import DataBaseStorage
 from src.constants import *
 
 
-class InsertRow:
+class InsertRow(DMLCommand):
     def __init__(self, table_name: str, row: ROW_TYPE):
         self._table_name = table_name
         self._row = row
