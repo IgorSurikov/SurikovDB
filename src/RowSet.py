@@ -1,4 +1,4 @@
-from typing import Generator
+from typing import Generator, Callable
 
 from src.Column import Column
 from src.Expression import Expression
@@ -6,9 +6,10 @@ from src.constants import *
 
 
 class RowSet:
-    def __init__(self, column_name_list: list[str], row_gen: Generator[ROW_TYPE, None, None]):
+    def __init__(self, column_name_list: list[str], row_gen: Callable[[], Generator[ROW_TYPE, None, None]], info: list):
         self._column_name_list = column_name_list
         self._row_gen = row_gen
+        self._info = info
 
     def where(self, filter_exp: Expression) -> 'RowSet':
         filter_exp_func, filter_exp_arg_name_list = filter_exp.parse()
@@ -19,7 +20,8 @@ class RowSet:
                 if filter_exp_func(**row_map):
                     yield row
 
-        return RowSet(self.column_name_list, row_gen())
+        info = self._info + [f'where: {filter_exp.value}']
+        return RowSet(self.column_name_list, row_gen, info)
 
     def select(self, exp_list: list[Expression]) -> 'RowSet':
 
@@ -42,10 +44,32 @@ class RowSet:
                     row_result.append(exp_func(**row_map))
                 yield tuple(row_result)
 
-        return RowSet(column_name_list, row_gen())
+        info = self._info + [f'select: {[exp.value for exp in exp_list]}']
+        return RowSet(column_name_list, row_gen, info)
 
-    def _row_map(self, row: ROW_TYPE) -> dict[str, DB_TYPE]:
-        return {c: v for c, v in zip(self._column_name_list, row)}
+    def join(self, row_set: 'RowSet', on_exp: Expression) -> 'RowSet':
+
+        on_exp_func, on_exp_arg_name_list = on_exp.parse()
+        row_set_source_table = row_set.info[0]
+        row_set_column_name_list = [c if c not in self._column_name_list else f'{row_set_source_table}.{c}'
+                                    for c in row_set.column_name_list]
+        column_name_list = self._column_name_list + row_set_column_name_list
+
+        def row_gen() -> Generator[ROW_TYPE, None, None]:
+            for row1 in self.row_gen:
+                for row2 in row_set.row_gen:
+                    row = row1 + row2
+                    row_map = self._row_map(row, column_name_list)
+                    if on_exp_func(**row_map):
+                        yield row
+
+        info = self._info + [f'join: {row_set.info} on {on_exp.value}']
+        return RowSet(column_name_list, row_gen, info)
+
+    def _row_map(self, row: ROW_TYPE, column_name_list: list[str] = None) -> dict[str, DB_TYPE]:
+        if column_name_list is None:
+            column_name_list = self._column_name_list
+        return {c: v for c, v in zip(column_name_list, row)}
 
     @property
     def column_name_list(self) -> list[str]:
@@ -53,4 +77,8 @@ class RowSet:
 
     @property
     def row_gen(self) -> Generator[ROW_TYPE, None, None]:
-        return self._row_gen
+        return self._row_gen()
+
+    @property
+    def info(self):
+        return self._info

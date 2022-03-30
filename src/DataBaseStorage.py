@@ -87,7 +87,7 @@ class DataBaseStorage(BlockStorage):
                     if not k[0]:
                         yield k[1:]
 
-        return RowSet([c.name for c in table_meta_data.column_list], row_gen())
+        return RowSet([c.name for c in table_meta_data.column_list], row_gen, [f'{table_name}'])
 
     def table_meta_data_gen(self) -> Generator[table_meta_data_gen_result, None, None]:
         for block_index in range(self.TABLE_META_DATA_BLOCK_COUNT):
