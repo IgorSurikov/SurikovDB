@@ -6,6 +6,7 @@ from typing import NoReturn, Generator
 
 from src.Block import Block
 from src.BlockStorage import BlockStorage
+from src.DML.DMLCommand import DMLCommand
 from src.DML.InsertRow import InsertRow
 from src.DataBaseStorage import DataBaseStorage
 from src.constants import *
@@ -13,7 +14,7 @@ from src.constants import *
 
 class Transaction(BlockStorage):
 
-    def __init__(self, command_list: list[InsertRow], path: str = None):
+    def __init__(self, command_list: list[DMLCommand], path: str = None):
         if path is None:
             path = 'tlog-' + str(datetime.datetime.now().timestamp())
         super().__init__(path, BLOCK_SIZE + calcsize(POINTER_F))

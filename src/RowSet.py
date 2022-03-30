@@ -13,10 +13,6 @@ class RowSet:
     def where(self, filter_exp: Expression) -> 'RowSet':
         filter_exp_func, filter_exp_arg_name_list = filter_exp.parse()
 
-        if not filter_exp_arg_name_list.issubset(self._column_name_list):
-            raise Exception(
-                f'columns: {filter_exp_arg_name_list - set(self._column_name_list)} is not exist in RowSet')
-
         def row_gen() -> Generator[ROW_TYPE, None, None]:
             for row in self.row_gen:
                 row_map = self._row_map(row)
@@ -25,15 +21,16 @@ class RowSet:
 
         return RowSet(self.column_name_list, row_gen())
 
-    def select(self, exp_list: list[Union[Expression, str]]) -> 'RowSet':
+    def select(self, exp_list: list[Expression]) -> 'RowSet':
+
+        exp_func_list = [exp.parse()[0] for exp in exp_list]
 
         j = 0
         column_name_list = []
         for exp in exp_list:
-            if isinstance(exp, str):
-                column_name_list.append(exp)
-
-            elif isinstance(exp, Expression):
+            if exp.value in self._column_name_list:
+                column_name_list.append(exp.value)
+            else:
                 column_name_list.append(f'col_{j}')
                 j += 1
 
@@ -41,12 +38,8 @@ class RowSet:
             for row in self.row_gen:
                 row_map = self._row_map(row)
                 row_result = []
-                for e in exp_list:
-                    if isinstance(e, str):
-                        row_result.append(row_map[e])
-                    if isinstance(e,Expression):
-                        exp_func, exp_arg_name_list = e.parse()
-                        row_result.append(exp_func(**row_map))
+                for exp_func in exp_func_list:
+                    row_result.append(exp_func(**row_map))
                 yield tuple(row_result)
 
         return RowSet(column_name_list, row_gen())

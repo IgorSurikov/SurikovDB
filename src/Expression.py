@@ -40,7 +40,14 @@ class Expression:
 
             elif isinstance(v, str) and not v.startswith("'") and not v.endswith("'"):
                 self.context_args.add(v)
-                return lambda **x: x[f'{v}'], self.context_args
+
+                def f(**x):
+                    try:
+                        return x[f'{v}']
+                    except KeyError as e:
+                        raise Exception(f'No column: {e.args[0]}')
+
+                return lambda **x: f(**x), self.context_args
 
             else:
                 raise Exception(f'invalid string: {v}')
@@ -55,4 +62,4 @@ class Expression:
                 raise Exception(f'invalid function: {v}')
 
             args = [Expression(i, self.context_args).parse()[0] for i in v[1:]]
-            return lambda **x: func(*[a.__call__(**x) for a in args]), self.context_args
+            return lambda **x: func(*[a(**x) for a in args]), self.context_args
