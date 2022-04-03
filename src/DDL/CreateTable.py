@@ -1,7 +1,7 @@
 from typing import Generator
 
 from src.constants import *
-from src.TableMetaData import TableMetaData
+from src.DDL.TableMetaData import TableMetaData
 from src.Block import Block, TableMetaDataBlock, DataBlock
 from src.DataBaseCommand import DataBaseCommand
 from src.DataBaseStorage import DataBaseStorage

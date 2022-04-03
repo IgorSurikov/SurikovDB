@@ -1,6 +1,5 @@
 from typing import Generator, Callable
 
-from src.Column import Column
 from src.Expression import Expression
 from src.constants import *
 

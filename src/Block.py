@@ -1,8 +1,7 @@
 from struct import unpack_from, pack, calcsize, iter_unpack
 from typing import NoReturn
 
-from src.Expression import Expression
-from src.TableMetaData import TableMetaData
+from src.DDL.TableMetaData import TableMetaData
 from src.constants import *
 
 

@@ -1,6 +1,6 @@
 import struct
 from struct import calcsize, unpack_from
-from src.Column import Column, ColumnFactory
+from src.DDL.Column import Column, ColumnFactory
 from src.constants import *
 
 
