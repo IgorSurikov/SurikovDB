@@ -6,7 +6,7 @@ from src.Block import Block
 from src.DataBaseStorage import DataBaseStorage
 
 
-class DMLCommand(metaclass=ABCMeta):
+class DataBaseCommand(metaclass=ABCMeta):
 
     @abc.abstractmethod
     def execute(self, data_base_storage: DataBaseStorage) -> Generator[Block, None, None]:
