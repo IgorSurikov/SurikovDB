@@ -1,14 +1,13 @@
 from typing import Generator
 
-from src.Block import TableMetaDataBlock, DataBlock, Block
-from src.DML.DMLCommand import DMLCommand
+from src.Block import Block
+from src.DataBaseCommand import DataBaseCommand
 from src.DML.Update import Update
 from src.DataBaseStorage import DataBaseStorage
 from src.Expression import Expression
-from src.constants import *
 
 
-class Delete(DMLCommand):
+class Delete(DataBaseCommand):
     def __init__(self, table_name: str, filter_exp: Expression):
         self._table_name = table_name
         self._filter_exp = filter_exp

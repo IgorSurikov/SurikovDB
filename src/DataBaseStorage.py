@@ -30,48 +30,16 @@ class DataBaseStorage(BlockStorage):
                                   table_meta_data_block_index: int) -> Generator[DataBlock, None, None]:
 
         row_format = table_meta_data.row_struct_format
+        data_block_table_meta_data = TableMetaDataBlock.from_block(self.read_block(table_meta_data_block_index))
 
-        table_meta_data_block = TableMetaDataBlock.from_block(self.read_block(table_meta_data_block_index))
-        pointer_on_block_of_pointers_list = table_meta_data_block.get_pointers()
+        data_block_pointer_lvl1 = DataBlock.from_block(
+            self.read_block(data_block_table_meta_data.data_block_pointer_lvl1), POINTER_F)
 
-        for i in pointer_on_block_of_pointers_list:
-            pointer_on_block_of_table_data_list = DataBlock.from_block(self.read_block(i), POINTER_F).read_rows()
-            for j in pointer_on_block_of_table_data_list:
-                table_data_block = DataBlock.from_block(self.read_block(j[0]), row_format)
-                yield table_data_block
-
-    def drop_table(self, table_name):
-        for table_meta_data, block_index in self.table_meta_data_gen():
-            if table_meta_data.name == table_name:
-                b = self.read_block(block_index)
-                b.free()
-                self.write_block(b)
-                break
-        else:
-            raise Exception('Table is not exist')
-
-    def create_table(self, table_meta_data: TableMetaData) -> NoReturn:
-
-        for i in range(self.TABLE_META_DATA_BLOCK_COUNT):
-            b = self.read_block(i)
-            if b.is_empty:
-                b = TableMetaDataBlock.from_block(b)
-                break
-        else:
-            raise Exception('No space for table')
-
-        b.create_table(table_meta_data)
-        data_block_for_pointers = DataBlock.from_block(self.allocate_block(), POINTER_F)
-        data_block_for_table_data = self.allocate_block()
-
-        data_block_for_pointers.write_row(
-            (data_block_for_table_data.idx,))
-
-        b.add_pointers([data_block_for_pointers.idx])
-
-        self.write_block(data_block_for_pointers)
-        self.write_block(data_block_for_table_data)
-        self.write_block(b)
+        for i in data_block_pointer_lvl1.read_rows():
+            data_block_pointer_lvl2_list = DataBlock.from_block(self.read_block(i[0]), POINTER_F).read_rows()
+            for j in data_block_pointer_lvl2_list:
+                data_block_table_data = DataBlock.from_block(self.read_block(j[0]), row_format)
+                yield data_block_table_data
 
     def scan(self, table_name: str) -> RowSet:
         for table_meta_data, block_index in self.table_meta_data_gen():
