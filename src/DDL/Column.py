@@ -3,6 +3,9 @@ from abc import ABCMeta
 from struct import calcsize
 from typing import Any
 
+from jsonschema import Draft202012Validator
+
+from src.JSONQLException import JSONQLException
 from src.constants import *
 
 
@@ -33,6 +36,24 @@ class Column(metaclass=ABCMeta):
 
 
 class ColumnChar(Column):
+    json_schema = {
+        "minItems": 3,
+        "maxItems": 3,
+        "type": "array",
+        "prefixItems": [
+            {"type": "string"},
+            {"enum": ["char"]},
+            {"type": "number"}
+        ],
+    }
+
+    @classmethod
+    def from_json(cls, json: Any) -> 'ColumnChar':
+        errors = list(Draft202012Validator(cls.json_schema).iter_errors(json))
+        if errors:
+            raise JSONQLException(errors)
+        return cls(json[0], json[2])
+
     def __init__(self, name: str, len_bytes: int):
         super().__init__(name)
         self._struct_format = 's'
@@ -61,6 +82,23 @@ class ColumnChar(Column):
 
 
 class ColumnLong(Column):
+    json_schema = {
+        "minItems": 2,
+        "maxItems": 2,
+        "type": "array",
+        "prefixItems": [
+            {"type": "string"},
+            {"enum": ["long"]}
+        ],
+
+    }
+
+    @classmethod
+    def from_json(cls, json: Any) -> 'ColumnLong':
+        errors = list(Draft202012Validator(cls.json_schema).iter_errors(json))
+        if errors:
+            raise JSONQLException(errors)
+        return cls(json[0])
 
     def __init__(self, name: str):
         super().__init__(name)
@@ -94,3 +132,12 @@ class ColumnFactory:
             return ColumnLong(name)
         else:
             raise Exception('Incorrect code')
+
+    @staticmethod
+    def column_from_json(json: Any) -> Column:
+        if json[1] == 'char':
+            return ColumnChar.from_json(json)
+        elif json[1] == 'long':
+            return ColumnLong.from_json(json)
+        else:
+            raise NotImplementedError

@@ -1,5 +1,9 @@
-from typing import Generator
+from typing import Generator, Any
 
+from jsonschema import Draft202012Validator
+
+from src.DDL.Column import ColumnLong, ColumnChar, ColumnFactory
+from src.JSONQLException import JSONQLException
 from src.constants import *
 from src.DDL.TableMetaData import TableMetaData
 from src.Block import Block, TableMetaDataBlock, DataBlock
@@ -8,6 +12,38 @@ from src.DataBaseStorage import DataBaseStorage
 
 
 class CreateTable(DataBaseCommand):
+    json_schema = {
+        "type": "object",
+        "properties": {
+            "type": {"type": "string"},
+            "table_name": {"type": "string"},
+            "columns": {
+                "type": "array",
+                "items":
+                    {"anyOf": [
+                        ColumnLong.json_schema,
+                        ColumnChar.json_schema,
+                    ]},
+                "minItems": 1,
+
+            }
+        },
+        "additionalProperties": False,
+        "required": ["type", "table_name", "columns"]
+
+    }
+
+    @classmethod
+    def from_json(cls, json: Any) -> 'CreateTable':
+        errors = list(Draft202012Validator(cls.json_schema).iter_errors(json))
+        if errors:
+            raise JSONQLException(errors)
+
+        table_name = json['table_name']
+        column_list = [ColumnFactory.column_from_json(c) for c in json['columns']]
+        table_meta_data = TableMetaData(table_name, column_list)
+        return cls(table_meta_data)
+
     def __init__(self, table_meta_data: TableMetaData):
         self._table_meta_data = table_meta_data
         self._result = None

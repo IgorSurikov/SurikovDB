@@ -1,11 +1,33 @@
-from typing import Generator
+from typing import Generator, Any
+
+from jsonschema import Draft202012Validator
 
 from src.Block import Block
 from src.DataBaseCommand import DataBaseCommand
 from src.DataBaseStorage import DataBaseStorage
+from src.JSONQLException import JSONQLException
 
 
 class DropTable(DataBaseCommand):
+    json_schema = {
+        "type": "object",
+        "properties": {
+            "type": {"type": "string"},
+            "table_name": {"type": "string"},
+        },
+        "additionalProperties": False,
+        "required": ["type", "table_name"]
+    }
+
+    @classmethod
+    def from_json(cls, json: Any) -> 'DropTable':
+        errors = list(Draft202012Validator(cls.json_schema).iter_errors(json))
+        if errors:
+            raise JSONQLException(errors)
+
+        table_name = json['table_name']
+        return cls(table_name)
+
     def __init__(self, table_name: str):
         self._table_name = table_name
         self._result = None
