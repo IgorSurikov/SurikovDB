@@ -2,6 +2,15 @@ from typing import Union, Callable, Any, Set, Tuple
 
 
 class Expression:
+    json_schema = {
+        "anyOf": [
+            {"type": "string"},
+            {"type": "number"},
+            {"type": "boolean"},
+            {"type": "array", "minItems": 2},
+        ]
+    }
+
     math_function_map = {
         'add': lambda *x: x[0] + x[1],
         'sub': lambda *x: x[0] - x[1],
