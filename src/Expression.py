@@ -35,8 +35,8 @@ class Expression:
                     'fn': self.math_function_map[f'{v}']
                 }, self.context_args
 
-            elif v in ['True', 'False']:
-                return lambda **x: bool(v), self.context_args
+            elif isinstance(v, bool):
+                return lambda **x: v, self.context_args
 
             elif isinstance(v, str) and not v.startswith("'") and not v.endswith("'"):
                 self.context_args.add(v)

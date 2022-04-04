@@ -14,7 +14,7 @@ class Delete(DataBaseCommand):
         self._result = None
 
     def execute(self, data_base_storage: DataBaseStorage) -> Generator[Block, None, None]:
-        update_map = {'.ROW_IS_DELETED': Expression("True")}
+        update_map = {'.ROW_IS_DELETED': Expression(True)}
 
         update = Update(self._table_name, self._filter_exp, update_map)
 
