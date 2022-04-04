@@ -50,9 +50,9 @@ class RowSet:
 
         on_exp_func, on_exp_arg_name_list = on_exp.parse()
         row_set_source_table = row_set.info[0]
-        row_set_column_name_list = [c if c not in self._column_name_list else f'{row_set_source_table}.{c}'
-                                    for c in row_set.column_name_list]
-        column_name_list = self._column_name_list + row_set_column_name_list
+        source_table = self.info[0]
+        column_name_list = [f'{source_table}.{c}' for c in self._column_name_list] + \
+                           [f'{row_set_source_table}.{c}' for c in row_set.column_name_list]
 
         def row_gen() -> Generator[ROW_TYPE, None, None]:
             for row1 in self.row_gen:

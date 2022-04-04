@@ -49,7 +49,7 @@ class Select(DataBaseCommand):
 
         if 'join' in json:
             for t, exp in json['join'].items():
-                row_set = data_base_storage.scan(table_name)
+                row_set = data_base_storage.scan(t)
                 row_set_result = row_set_result.join(row_set, Expression(exp))
 
         if 'where' in json:
