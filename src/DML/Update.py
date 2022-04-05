@@ -1,12 +1,48 @@
-from typing import Generator
+from typing import Generator, Any
+
+from jsonschema import Draft202012Validator
 
 from src.Block import Block
 from src.DataBaseCommand import DataBaseCommand
 from src.DataBaseStorage import DataBaseStorage
 from src.Expression import Expression
+from src.JSONQLException import JSONQLException
 
 
 class Update(DataBaseCommand):
+    json_schema = {
+        "type": "object",
+        "properties": {
+            "type": {"type": "string"},
+            "table_name": {"type": "string"},
+            "set": {
+                "type": "object",
+                "additionalProperties": Expression.json_schema
+            },
+            "where": Expression.json_schema
+        },
+        "additionalProperties": False,
+        "required": ["type", "table_name", "set"]
+    }
+
+    @classmethod
+    def from_json(cls, json: Any) -> 'Update':
+        errors = list(Draft202012Validator(cls.json_schema).iter_errors(json))
+        if errors:
+            raise JSONQLException(errors)
+
+        table_name = json['table_name']
+        if 'where' in json:
+            filter_exp = Expression(json['where'])
+        else:
+            filter_exp = Expression(True)
+
+        update_map = {}
+        for c, exp in json['set'].items():
+            update_map[c] = Expression(exp)
+
+        return cls(table_name, filter_exp, update_map)
+
     def __init__(self, table_name: str, filter_exp: Expression, update_map: dict[str, Expression]):
         self._table_name = table_name
         self._filter_exp = filter_exp
