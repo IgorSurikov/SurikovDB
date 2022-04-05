@@ -15,6 +15,9 @@ class InsertRow(DataBaseCommand):
     def execute(self, data_base_storage: DataBaseStorage) -> Generator[Block, None, None]:
         table_meta_data, block_index = data_base_storage.get_table_meta_data(self._table_name)
 
+        if len(self._row) != len(table_meta_data.column_list):
+            raise Exception(f'Invalid row size - row :{self._row}, column list - {table_meta_data.column_list}')
+
         for v, c in zip(self._row, table_meta_data.column_list):
             if not c.is_valid_value(v):
                 raise Exception(f'Column {c.name} - value {v} is not valid')
