@@ -51,8 +51,8 @@ class RowSet:
         on_exp_func, on_exp_arg_name_list = on_exp.parse()
         row_set_source_table = row_set.info[0]
         source_table = self.info[0]
-        column_name_list = [f'{source_table}.{c}' for c in self._column_name_list] + \
-                           [f'{row_set_source_table}.{c}' for c in row_set.column_name_list]
+        column_name_list = [f'{source_table}.{c}' if '.' not in c else c for c in self._column_name_list] + \
+                           [f'{row_set_source_table}.{c}' if '.' not in c else c for c in row_set.column_name_list]
 
         def row_gen() -> Generator[ROW_TYPE, None, None]:
             for row1 in self.row_gen:
@@ -81,3 +81,10 @@ class RowSet:
     @property
     def info(self):
         return self._info
+
+    @property
+    def json(self):
+        return {
+            'columns': self.column_name_list,
+            'data': [row for row in self.row_gen]
+        }
