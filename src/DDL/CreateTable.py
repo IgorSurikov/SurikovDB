@@ -49,6 +49,11 @@ class CreateTable(DataBaseCommand):
         self._result = None
 
     def execute(self, data_base_storage: DataBaseStorage) -> Generator[Block, None, None]:
+        for t in data_base_storage.table_meta_data_gen():
+            if self._table_meta_data.name == t.table_meta_data.name:
+                raise Exception('Table name must be unique')
+
+
         for i in range(data_base_storage.TABLE_META_DATA_BLOCK_COUNT):
             b = data_base_storage.read_block(i)
             if b.is_empty:
