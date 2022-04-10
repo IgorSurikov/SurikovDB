@@ -48,6 +48,9 @@ class DataBase:
             table_list.append(str(i.table_meta_data))
         return table_list
 
+    def __del__(self):
+        self._data_base_storage.file.close()
+
 
     @property
     def name(self) -> str:
