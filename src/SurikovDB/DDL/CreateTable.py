@@ -2,13 +2,13 @@ from typing import Generator, Any
 
 from jsonschema import Draft202012Validator
 
-from src.DDL.Column import ColumnLong, ColumnChar, ColumnFactory
-from src.JSONQLException import JSONQLException
-from src.constants import *
-from src.DDL.TableMetaData import TableMetaData
-from src.Block import Block, TableMetaDataBlock, DataBlock
-from src.DataBaseCommand import DataBaseCommand
-from src.DataBaseStorage import DataBaseStorage
+from src.SurikovDB.DDL.Column import ColumnLong, ColumnChar, ColumnFactory
+from src.SurikovDB.JSONQLException import JSONQLException
+from src.SurikovDB.constants import *
+from src.SurikovDB.DDL.TableMetaData import TableMetaData
+from src.SurikovDB.Block import Block, TableMetaDataBlock, DataBlock
+from src.SurikovDB.DataBaseCommand import DataBaseCommand
+from src.SurikovDB.DataBaseStorage import DataBaseStorage
 
 
 class CreateTable(DataBaseCommand):

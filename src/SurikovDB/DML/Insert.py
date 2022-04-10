@@ -2,14 +2,13 @@ from typing import Generator, Any
 
 from jsonschema import Draft202012Validator
 
-from src.Block import TableMetaDataBlock, DataBlock, Block
-from src.DML.InsertRow import InsertRow
-from src.DML.Select import Select
-from src.DataBaseCommand import DataBaseCommand
-from src.DataBaseStorage import DataBaseStorage
-from src.JSONQLException import JSONQLException
-from src.RowSet import RowSet
-from src.constants import *
+from src.SurikovDB.Block import Block
+from src.SurikovDB.DML.InsertRow import InsertRow
+from src.SurikovDB.DML.Select import Select
+from src.SurikovDB.DataBaseCommand import DataBaseCommand
+from src.SurikovDB.DataBaseStorage import DataBaseStorage
+from src.SurikovDB.JSONQLException import JSONQLException
+from src.SurikovDB.RowSet import RowSet
 
 
 class Insert(DataBaseCommand):

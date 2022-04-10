@@ -1,8 +1,8 @@
 from struct import unpack_from, pack, calcsize, iter_unpack
 from typing import NoReturn
 
-from src.DDL.TableMetaData import TableMetaData
-from src.constants import *
+from src.SurikovDB.DDL.TableMetaData import TableMetaData
+from src.SurikovDB.constants import *
 
 
 class Block(bytearray):

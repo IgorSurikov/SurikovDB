@@ -2,8 +2,8 @@ import abc
 from abc import ABCMeta
 from typing import Generator, Any
 
-from src.Block import Block
-from src.DataBaseStorage import DataBaseStorage
+from src.SurikovDB.Block import Block
+from src.SurikovDB.DataBaseStorage import DataBaseStorage
 
 
 class DataBaseCommand(metaclass=ABCMeta):

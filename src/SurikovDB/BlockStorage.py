@@ -1,7 +1,7 @@
 import os
 from typing import NoReturn
 
-from src.Block import Block
+from src.SurikovDB.Block import Block
 
 
 class BlockStorage:

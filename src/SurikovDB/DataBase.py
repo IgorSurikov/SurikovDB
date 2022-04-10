@@ -2,9 +2,9 @@ import os
 from time import time
 from typing import Union
 
-from src.DataBaseStorage import DataBaseStorage
-from src.JSONQLParser import JSONQLParser
-from src.RowSet import RowSet
+from src.SurikovDB.DataBaseStorage import DataBaseStorage
+from src.SurikovDB.JSONQLParser import JSONQLParser
+from src.SurikovDB.RowSet import RowSet
 
 
 class DataBase:

@@ -2,10 +2,10 @@ from typing import Generator, Any
 
 from jsonschema import Draft202012Validator
 
-from src.Block import Block
-from src.DataBaseCommand import DataBaseCommand
-from src.DataBaseStorage import DataBaseStorage
-from src.JSONQLException import JSONQLException
+from src.SurikovDB.Block import Block
+from src.SurikovDB.DataBaseCommand import DataBaseCommand
+from src.SurikovDB.DataBaseStorage import DataBaseStorage
+from src.SurikovDB.JSONQLException import JSONQLException
 
 
 class DropTable(DataBaseCommand):

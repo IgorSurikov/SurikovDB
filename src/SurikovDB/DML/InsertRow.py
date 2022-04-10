@@ -1,9 +1,9 @@
 from typing import Generator
 
-from src.Block import TableMetaDataBlock, DataBlock, Block
-from src.DataBaseCommand import DataBaseCommand
-from src.DataBaseStorage import DataBaseStorage
-from src.constants import *
+from src.SurikovDB.Block import TableMetaDataBlock, DataBlock, Block
+from src.SurikovDB.DataBaseCommand import DataBaseCommand
+from src.SurikovDB.DataBaseStorage import DataBaseStorage
+from src.SurikovDB.constants import *
 
 
 class InsertRow(DataBaseCommand):

@@ -5,8 +5,7 @@ import shutil
 
 import platformdirs
 
-from src.DataBase import DataBase
-from src.DataBaseStorage import DataBaseStorage
+from src.SurikovDB.DataBase import DataBase
 
 
 class DBMS:

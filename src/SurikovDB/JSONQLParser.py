@@ -1,16 +1,16 @@
-from typing import Any, Union
+from typing import Union
 
 from jsonschema import Draft202012Validator
 
-from src.DDL.CreateTable import CreateTable
-from src.DDL.DropTable import DropTable
-from src.DML.Delete import Delete
-from src.DML.Insert import Insert
-from src.DML.InsertRows import InsertRows
-from src.DML.Select import Select
-from src.DML.Update import Update
-from src.JSONQLException import JSONQLException
-from src.Transaction import Transaction
+from src.SurikovDB.DDL.CreateTable import CreateTable
+from src.SurikovDB.DDL.DropTable import DropTable
+from src.SurikovDB.DML.Delete import Delete
+from src.SurikovDB.DML.Insert import Insert
+from src.SurikovDB.DML.InsertRows import InsertRows
+from src.SurikovDB.DML.Select import Select
+from src.SurikovDB.DML.Update import Update
+from src.SurikovDB.JSONQLException import JSONQLException
+from src.SurikovDB.Transaction import Transaction
 
 
 class JSONQLParser:

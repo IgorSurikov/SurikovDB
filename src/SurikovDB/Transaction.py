@@ -3,11 +3,11 @@ import os
 from struct import unpack_from, pack, calcsize
 from typing import NoReturn, Generator
 
-from src.Block import Block
-from src.BlockStorage import BlockStorage
-from src.DataBaseCommand import DataBaseCommand
-from src.DataBaseStorage import DataBaseStorage
-from src.constants import *
+from src.SurikovDB.Block import Block
+from src.SurikovDB.BlockStorage import BlockStorage
+from src.SurikovDB.DataBaseCommand import DataBaseCommand
+from src.SurikovDB.DataBaseStorage import DataBaseStorage
+from src.SurikovDB.constants import *
 
 
 class Transaction(BlockStorage):
