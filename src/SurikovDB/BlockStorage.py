@@ -47,3 +47,8 @@ class BlockStorage:
     @property
     def block_count(self) -> int:
         return self._block_count
+
+
+    @property
+    def file(self):
+        return self._file
