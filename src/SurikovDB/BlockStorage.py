@@ -1,5 +1,5 @@
 import os
-from typing import NoReturn
+from typing import NoReturn, BinaryIO
 
 from src.SurikovDB.Block import Block
 
@@ -11,6 +11,7 @@ class BlockStorage:
             f = open(path, 'x')
             f.close()
 
+        self._path = path
         self._file = open(path, 'r+b', buffering=16 * self._block_size)
 
         file_size = os.path.getsize(path)
@@ -48,7 +49,10 @@ class BlockStorage:
     def block_count(self) -> int:
         return self._block_count
 
+    @property
+    def file(self) -> BinaryIO:
+        return self._file
 
     @property
-    def file(self):
-        return self._file
+    def path(self) -> str:
+        return self._path

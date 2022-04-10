@@ -1,30 +1,40 @@
 import datetime
 import os
 from struct import unpack_from, pack, calcsize
-from typing import NoReturn, Generator
+from typing import NoReturn, Generator, Optional, Any
 
+from src.SurikovDB import DataBaseStorage
 from src.SurikovDB.Block import Block
 from src.SurikovDB.BlockStorage import BlockStorage
 from src.SurikovDB.DataBaseCommand import DataBaseCommand
-from src.SurikovDB.DataBaseStorage import DataBaseStorage
 from src.SurikovDB.constants import *
 
 
 class Transaction(BlockStorage):
 
-    def __init__(self, command_list: list[DataBaseCommand], path: str = None):
-        if path is None:
-            path = 'tlog-' + str(datetime.datetime.now().timestamp())
-        super().__init__(path, BLOCK_SIZE + calcsize(POINTER_F))
+    def __init__(self, command_list: list[DataBaseCommand], data_base_storage: DataBaseStorage,
+                 transaction_file_path: Optional[str] = None):
+
+        if transaction_file_path is None:
+            data_base_dir = os.path.split(data_base_storage.path)[0:-1]
+            transaction_file_name = 'tlog-' + str(datetime.datetime.now().timestamp())
+            transaction_file_path = os.path.join(*data_base_dir, transaction_file_name)
+
+        super().__init__(transaction_file_path, BLOCK_SIZE + calcsize(POINTER_F))
 
         self._command_list = command_list
         self._result = None
         self._block_idx_list = [i.idx for i in self._block_gen()]
-        self._path = path
+        self._path = transaction_file_path
+        self._data_base_storage = data_base_storage
+
+    @classmethod
+    def from_transaction_file_path(cls, data_base_storage: DataBaseStorage, transaction_file_path: str):
+        return cls([], data_base_storage, transaction_file_path)
 
     def __del__(self):
-        self._file.close()
-        os.remove(self._path)
+        self.file.close()
+        os.remove(self.path)
 
     @property
     def result(self):
@@ -48,13 +58,14 @@ class Transaction(BlockStorage):
             database_storage_block_idx = unpack_from(f'{POINTER_F}', block)[0]
             yield Block(database_storage_block_data, database_storage_block_idx, BLOCK_SIZE)
 
-    def rollback(self, data_base_storage: DataBaseStorage) -> NoReturn:
+    def rollback(self) -> NoReturn:
         for i in self._block_gen():
-            data_base_storage.write_block(i)
+            self._data_base_storage.write_block(i)
 
-    def execute(self, data_base_storage: DataBaseStorage) -> NoReturn:
+    def execute(self) -> NoReturn:
+
         for c in self._command_list:
-            for modified_block in c.execute(data_base_storage):
+            for modified_block in c.execute(self._data_base_storage):
                 self._save_database_storage_block(modified_block)
 
         self._result = self._command_list[::-1][0].result
