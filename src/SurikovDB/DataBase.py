@@ -45,7 +45,7 @@ class DataBase:
     def get_table_list(self):
         table_list = []
         for i in self._data_base_storage.table_meta_data_gen():
-            table_list.append(str(i.table_meta_data))
+            table_list.append(i.table_meta_data.json)
         return table_list
 
     def __del__(self):

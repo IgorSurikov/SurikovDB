@@ -21,7 +21,7 @@ class TestDataBase(TestCase):
         })
 
         self.assertIsNone(r['result'])
-        self.assertIn('UserInfo:\n\tid - long\n\tname - char(20)\n\taddress - char(50)',
+        self.assertIn({'table_name': 'UserInfo', 'columns': ['id - long', 'name - char(20)', 'address - char(50)']},
                       self.data_base.get_table_list())
 
         r = self.data_base.query({
@@ -201,11 +201,11 @@ class TestDataBase(TestCase):
         })
 
         self.assertEqual(r['result']['columns'], ['user_name', 'role_name', 'desc'])
-        self.assertEqual(r['result']['data'] , [('Игорь', 'Админ', 'Игорь имеет роль - Админ'),
-                                                 ('Игорь', 'Юзер', 'Игорь имеет роль - Юзер'),
-                                                 ('Алёна', 'Модератор', 'Алёна имеет роль - Модератор'),
-                                                 ('Алёна', 'Юзер', 'Алёна имеет роль - Юзер'),
-                                                 ('Макс', 'Юзер', 'Макс имеет роль - Юзер')])
+        self.assertEqual(r['result']['data'], [('Игорь', 'Админ', 'Игорь имеет роль - Админ'),
+                                               ('Игорь', 'Юзер', 'Игорь имеет роль - Юзер'),
+                                               ('Алёна', 'Модератор', 'Алёна имеет роль - Модератор'),
+                                               ('Алёна', 'Юзер', 'Алёна имеет роль - Юзер'),
+                                               ('Макс', 'Юзер', 'Макс имеет роль - Юзер')])
 
     def tearDown(self) -> None:
         del self.data_base

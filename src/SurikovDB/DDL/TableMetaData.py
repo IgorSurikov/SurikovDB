@@ -74,7 +74,13 @@ class TableMetaData:
         struct_format = f'{TABLE_NAME_F}{COLUMN_COUNT_F}' + (f'{COLUMN_NAME_F}{COLUMN_CODE_F}' * self._column_count)
         return struct_format
 
+    @property
+    def json(self):
+        return {
+            'table_name': self._name,
+            'columns': [str(i) for i in self._column_list]
+        }
+
     def __str__(self):
         column_list_str = '\n\t'.join(map(str, self._column_list))
         return f"{self._name}:\n\t{column_list_str}"
-
