@@ -13,6 +13,7 @@ class DataBase:
         self._data_base_storage = DataBaseStorage(path)
         self._name = os.path.split(path)[-1]
         self._path = path
+        # self._recover_data()
 
     def query(self, json: Union[dict, list]) -> dict:
         start_time = time()
@@ -50,6 +51,17 @@ class DataBase:
         for i in self._data_base_storage.table_meta_data_gen():
             table_list.append(i.table_meta_data.json)
         return table_list
+
+    def _recover_data(self):
+        data_base_dir_path = os.path.join(*os.path.split(self._path)[0:-1])
+        transaction_file_list = [i for i in os.listdir(data_base_dir_path) if i.startswith('tlog-')]
+
+        transaction_file_list = sorted(transaction_file_list, key=lambda i: float(i[5:]), reverse=True)
+
+        for transaction_file in transaction_file_list:
+            transaction_file_path = os.path.join(data_base_dir_path, transaction_file)
+            transaction = Transaction.from_transaction_file_path(self._data_base_storage, transaction_file_path)
+            transaction.rollback()
 
     def __del__(self):
         self._data_base_storage.file.close()
