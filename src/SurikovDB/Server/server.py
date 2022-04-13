@@ -2,12 +2,11 @@ from typing import Optional
 
 from aiohttp import web
 
-from SurikovDB.DataBase import DataBase
 
 
 class DataBaseServer:
 
-    def __init__(self, data_base: DataBase, host: Optional[str] = None, port: Optional[int] = None):
+    def __init__(self, data_base, host: Optional[str] = None, port: Optional[int] = None):
         self._data_base = data_base
         if host is None:
             host = 'localhost'

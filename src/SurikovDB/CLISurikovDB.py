@@ -13,15 +13,16 @@ def list_db(args):
 
 
 def create_db(args):
-    pass
+    DBMS.create_data_base(args.path, args.database_name)
 
 
 def drop_db(args):
-    pass
+    DBMS.drop_data_base(args.database_name)
 
 
 def start_db(args):
-    pass
+    db = DBMS.get_data_base(args.database_name)
+    db.run(args.host, args.port)
 
 
 list_db_parser = subparsers.add_parser('list_db', help='List all databases')
@@ -29,14 +30,18 @@ list_db_parser.set_defaults(func=list_db)
 
 create_db_parser = subparsers.add_parser('create_db', help='Create database')
 create_db_parser.add_argument('database_name', help='Database name')
+create_db_parser.add_argument('path', help='Path to folder to store database')
+create_db_parser.set_defaults(func=create_db)
 
 drop_db_parser = subparsers.add_parser('drop_db', help='Drop database')
 drop_db_parser.add_argument('database_name', help='Database name')
+drop_db_parser.set_defaults(func=drop_db)
 
 start_db_parser = subparsers.add_parser('start_db', help='Start database http server')
 start_db_parser.add_argument('database_name', help='Database name')
-start_db_parser.add_argument('-H', help='Host', nargs=1, default='localhost')
-start_db_parser.add_argument('-P', help='Port', nargs=1, default='3471')
+start_db_parser.add_argument('-H', dest='host', help='Host', nargs=1, default=None)
+start_db_parser.add_argument('-P', dest='port', help='Port', nargs=1, default=None)
+start_db_parser.set_defaults(func=start_db)
 
 
 def main():

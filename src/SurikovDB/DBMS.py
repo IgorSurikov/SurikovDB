@@ -70,3 +70,4 @@ class DBMS:
             data_base_list = json.load(f)
 
         return [{'name': os.path.split(path)[-1], 'path': path} for path in data_base_list]
+

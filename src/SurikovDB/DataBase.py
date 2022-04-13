@@ -5,6 +5,7 @@ from typing import Union
 from SurikovDB.DataBaseStorage import DataBaseStorage
 from SurikovDB.JSONQLParser import JSONQLParser
 from SurikovDB.RowSet import RowSet
+from SurikovDB.Server.server import DataBaseServer
 from SurikovDB.Transaction import Transaction
 from SurikovDB.constants import *
 
@@ -66,6 +67,10 @@ class DataBase:
 
     def __del__(self):
         self._data_base_storage.file.close()
+
+    def run(self, host=None, port=None):
+        dbs = DataBaseServer(self, host=host, port=port)
+        dbs.run()
 
     @property
     def name(self) -> str:
