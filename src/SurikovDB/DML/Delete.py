@@ -2,12 +2,12 @@ from typing import Generator, Any
 
 from jsonschema import Draft202012Validator
 
-from src.SurikovDB.Block import Block
-from src.SurikovDB.DataBaseCommand import DataBaseCommand
-from src.SurikovDB.DML.Update import Update
-from src.SurikovDB.DataBaseStorage import DataBaseStorage
-from src.SurikovDB.Expression import Expression
-from src.SurikovDB.JSONQLException import JSONQLException
+from SurikovDB.Block import Block
+from SurikovDB.DataBaseCommand import DataBaseCommand
+from SurikovDB.DML.Update import Update
+from SurikovDB.DataBaseStorage import DataBaseStorage
+from SurikovDB.Expression import Expression
+from SurikovDB.JSONQLException import JSONQLException
 
 
 class Delete(DataBaseCommand):

@@ -2,16 +2,16 @@ from typing import Union
 
 from jsonschema import Draft202012Validator
 
-from src.SurikovDB.DataBaseCommand import DataBaseCommand
-from src.SurikovDB.DDL.CreateTable import CreateTable
-from src.SurikovDB.DDL.DropTable import DropTable
-from src.SurikovDB.DML.Delete import Delete
-from src.SurikovDB.DML.Insert import Insert
-from src.SurikovDB.DML.InsertRows import InsertRows
-from src.SurikovDB.DML.Select import Select
-from src.SurikovDB.DML.Update import Update
-from src.SurikovDB.JSONQLException import JSONQLException
-
+from SurikovDB.DataBaseCommand import DataBaseCommand
+from SurikovDB.DDL.CreateTable import CreateTable
+from SurikovDB.DDL.DropTable import DropTable
+from SurikovDB.DML.Delete import Delete
+from SurikovDB.DML.Insert import Insert
+from SurikovDB.DML.InsertRows import InsertRows
+from SurikovDB.DML.Select import Select
+from SurikovDB.DML.Update import Update
+from SurikovDB.JSONQLException import JSONQLException
+from SurikovDB.constants import *
 
 class JSONQLParser:
     json_schema = {

@@ -1,9 +1,9 @@
 from typing import Generator
 
-from src.SurikovDB.Block import TableMetaDataBlock, DataBlock, Block
-from src.SurikovDB.DataBaseCommand import DataBaseCommand
-from src.SurikovDB.DataBaseStorage import DataBaseStorage
-from src.SurikovDB.constants import *
+from SurikovDB.Block import TableMetaDataBlock, DataBlock, Block
+from SurikovDB.DataBaseCommand import DataBaseCommand
+from SurikovDB.DataBaseStorage import DataBaseStorage
+from SurikovDB.constants import ROW_TYPE, POINTER_F
 
 
 class InsertRow(DataBaseCommand):

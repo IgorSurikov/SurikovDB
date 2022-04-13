@@ -2,7 +2,7 @@ from typing import Optional
 
 from aiohttp import web
 
-from src.SurikovDB.DataBase import DataBase
+from SurikovDB.DataBase import DataBase
 
 
 class DataBaseServer:

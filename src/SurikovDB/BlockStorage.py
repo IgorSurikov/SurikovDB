@@ -1,7 +1,8 @@
 import os
 from typing import NoReturn, BinaryIO
 
-from src.SurikovDB.Block import Block
+from SurikovDB.Block import Block
+from SurikovDB.constants import *
 
 
 class BlockStorage:

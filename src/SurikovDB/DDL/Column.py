@@ -5,8 +5,8 @@ from typing import Any
 
 from jsonschema import Draft202012Validator
 
-from src.SurikovDB.JSONQLException import JSONQLException
-from src.SurikovDB.constants import *
+from SurikovDB.JSONQLException import JSONQLException
+from SurikovDB.constants import *
 
 
 class Column(metaclass=ABCMeta):

@@ -1,11 +1,11 @@
 import typing
 from typing import Generator
 
-from src.SurikovDB.BlockStorage import BlockStorage
-from src.SurikovDB.RowSet import RowSet
-from src.SurikovDB.DDL.TableMetaData import TableMetaData
-from src.SurikovDB.constants import *
-from src.SurikovDB.Block import TableMetaDataBlock, DataBlock
+from SurikovDB.BlockStorage import BlockStorage
+from SurikovDB.RowSet import RowSet
+from SurikovDB.DDL.TableMetaData import TableMetaData
+from SurikovDB.Block import TableMetaDataBlock, DataBlock
+from SurikovDB.constants import *
 
 
 class DataBaseStorage(BlockStorage):

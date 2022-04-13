@@ -1,5 +1,5 @@
 from typing import Union, Callable, Any, Set, Tuple
-
+from SurikovDB.constants import *
 
 class Expression:
     json_schema = {

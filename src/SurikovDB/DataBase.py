@@ -2,10 +2,11 @@ import os
 from time import time
 from typing import Union
 
-from src.SurikovDB.DataBaseStorage import DataBaseStorage
-from src.SurikovDB.JSONQLParser import JSONQLParser
-from src.SurikovDB.RowSet import RowSet
-from src.SurikovDB.Transaction import Transaction
+from SurikovDB.DataBaseStorage import DataBaseStorage
+from SurikovDB.JSONQLParser import JSONQLParser
+from SurikovDB.RowSet import RowSet
+from SurikovDB.Transaction import Transaction
+from SurikovDB.constants import *
 
 
 class DataBase:

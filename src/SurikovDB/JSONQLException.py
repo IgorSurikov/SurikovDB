@@ -1,5 +1,5 @@
 from jsonschema import ValidationError
-
+from SurikovDB.constants import *
 
 class JSONQLException(Exception):
     def __init__(self, error_list: list[ValidationError]):

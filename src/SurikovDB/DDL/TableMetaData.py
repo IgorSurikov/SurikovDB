@@ -1,7 +1,7 @@
 import struct
 from struct import calcsize, unpack_from
-from src.SurikovDB.DDL.Column import Column, ColumnFactory
-from src.SurikovDB.constants import *
+from SurikovDB.DDL.Column import Column, ColumnFactory
+from SurikovDB.constants import *
 
 
 class TableMetaData:

@@ -1,12 +1,12 @@
 from unittest import TestCase
 
-from src.SurikovDB.DBMS import DBMS
+from SurikovDB.DBMS import DBMS
 
 
 class TestDataBase(TestCase):
 
     def setUp(self) -> None:
-        DBMS.create_data_base(r'D:\Dev\python\SurikovDB', 'TestDB')
+        DBMS.create_data_base(r'/', 'TestDB')
         self.data_base = DBMS.get_data_base('TestDB')
 
     def test_data_base_query(self):

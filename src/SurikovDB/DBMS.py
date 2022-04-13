@@ -2,10 +2,10 @@ import json
 import os
 from typing import NoReturn
 import shutil
-
+from SurikovDB.constants import *
 import platformdirs
 
-from src.SurikovDB.DataBase import DataBase
+from SurikovDB.DataBase import DataBase
 
 
 class DBMS:

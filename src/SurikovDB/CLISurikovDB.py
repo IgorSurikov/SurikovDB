@@ -38,6 +38,7 @@ start_db_parser.add_argument('database_name', help='Database name')
 start_db_parser.add_argument('-H', help='Host', nargs=1, default='localhost')
 start_db_parser.add_argument('-P', help='Port', nargs=1, default='3471')
 
-if __name__ == "__main__":
+
+def main():
     args = parser.parse_args()
     args.func(args)

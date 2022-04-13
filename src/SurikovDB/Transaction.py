@@ -1,13 +1,13 @@
 import datetime
 import os
 from struct import unpack_from, pack, calcsize
-from typing import NoReturn, Generator, Optional, Any
+from typing import NoReturn, Generator, Optional
 
-from src.SurikovDB import DataBaseStorage
-from src.SurikovDB.Block import Block
-from src.SurikovDB.BlockStorage import BlockStorage
-from src.SurikovDB.DataBaseCommand import DataBaseCommand
-from src.SurikovDB.constants import *
+from SurikovDB import DataBaseStorage
+from SurikovDB.Block import Block
+from SurikovDB.BlockStorage import BlockStorage
+from SurikovDB.DataBaseCommand import DataBaseCommand
+from SurikovDB.constants import *
 
 
 class Transaction(BlockStorage):

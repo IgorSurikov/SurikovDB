@@ -1,7 +1,7 @@
 from typing import Generator, Callable
 
-from src.SurikovDB.Expression import Expression
-from src.SurikovDB.constants import *
+from SurikovDB.Expression import Expression
+from SurikovDB.constants import *
 
 
 class RowSet:
