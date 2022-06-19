@@ -22,6 +22,10 @@ class Expression:
         'lt': lambda *x: x[0] < x[1],
         'le': lambda *x: x[0] <= x[1],
         'ne': lambda *x: x[0] != x[1],
+        'and': lambda *x: x[0] and x[1],
+        'or': lambda *x: x[0] or x[1],
+        'to_str': lambda *x: str(x[0]),
+        'to_int': lambda *x: int(x[0]),
     }
 
     def __init__(self, value: Union[dict, int, str, list], context_args=None):

@@ -22,7 +22,9 @@ def drop_db(args):
 
 def start_db(args):
     db = DBMS.get_data_base(args.database_name)
-    db.run(args.host, args.port)
+    host = args.host[0] if args.host else args.host
+    port = args.port[0] if args.port else args.port
+    db.run(host, port)
 
 
 list_db_parser = subparsers.add_parser('list_db', help='List all databases')
@@ -47,3 +49,4 @@ start_db_parser.set_defaults(func=start_db)
 def main():
     args = parser.parse_args()
     args.func(args)
+

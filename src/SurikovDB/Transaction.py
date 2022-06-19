@@ -12,7 +12,8 @@ from SurikovDB.constants import *
 
 class Transaction(BlockStorage):
 
-    def __init__(self, command_list: list[DataBaseCommand], data_base_storage: DataBaseStorage,
+    def __init__(self, command_list: list[DataBaseCommand],
+                 data_base_storage: DataBaseStorage,
                  transaction_file_path: Optional[str] = None):
 
         if transaction_file_path is None:
